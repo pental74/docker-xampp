@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrazione sito Scout</title>
+
+    <!-- CSS impostazioni per la tabella Foglio di stile incorporato --> 
+    <link rel="stylesheet" href="foglioStile.css">
+
+    <!-- Foglio stile interno -->
+    <style type="text/css">
+        table, th, td {
+            padding: 1em;
+            width: fit-content;
+            border: 2px solid black;
+            border-collapse: collapse;
+        }
+
+        img { 
+         border-radius: 8px;
+         display: block;
+         /* immagini al centro
+         margin-left: auto;
+         margin-right: auto; */
+         width: 50%;
+        }
+
+        /* # hashtag indica l'attributo ID 
+           può essere utilizzato una unica volta
+        */
+        #titolo {
+         text-align: center;
+         text-decoration-line: overline underline;
+         text-decoration-color: blue;  
+        }
+
+         /* . il punto indica la proprietà CLASS 
+         può essere più volte su più tag
+         */
+        .inf {
+         background-color: cornflowerblue;
+        }
+
+        .sis {
+         background-color:chartreuse;
+        }
+
+        .mat {
+         background-color:chocolate;
+        }
+
+        .tps {
+         background-color:magenta;
+        }
+
+        .rel {
+         background-color:brown;
+        }
+
+        .smot {
+         background-color:gold;
+        }
+
+        .ita {
+         background-color:darkorchid;
+        }
+
+        .gpoi {
+         background-color:darkolivegreen;
+        }
+
+        .ing {
+         background-color:springgreen;
+        }
+
+        .ia {
+         background-color:lightgreen;
+        }
+
+        .pot {
+         background-color:silver;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IIS MARCONI PIERALISI</h1>
+        <nav>
+           <ul>
+              <li><a href="index.html">Informatica</a></li>
+              <li><a href="">Sistemi e rete</a></li>
+              <li><a href="">Tpsit</a></li>
+              <li><a href="">Italiano</a></li>
+              <li><a href="">Matematica</a></li>
+              <li><a href="">Inglese</a></li>
+              <li><a href="">Scienze Motorie</a></li>
+              <li><a href="">Storia</a></li>
+              <li><a href="">GPOI</a></li>
+              <li><a href="">Religione</a></li>
+              <li><a href="progettoAnno.html">Progetto dell'anno</a></li>
+            </ul>
+        </nav>
+     </header>
+
+    <h1 id="titolo">Registrazione Scout</h1>
+
+  
+    <section>
+        <form name="registrazione">
+            <!-- input tipo text-->
+            <label for="fname">Nome</label><br>
+            <input type="text" id="fname" name="fname" value=""><br><br>
+
+            <label for="lname">Cognome</label><br>
+            <input type="text" id="lname" name="lname" value=""><br><br>
+
+            <!-- Citta select - selezione fra diverse opzioni-->
+            <label for="citta_nascita">Città di nascita</label><br>
+            <select id="citta_nascita" name="citta_nascita" required>
+                <option value=""></option>  
+                <option value="Ancona">Ancona</option>
+                <option value="Jesi">Jesi</option>
+                <option value="Monsano">Monsano</option>
+            </select><br><br>
+
+            <!-- input tipo date -->
+            <label for="data_nascita">Data nascita</label><br>
+            <input type="date" id="data_nascita" name="data_nascita" required><br><br>
+
+            <!-- input tipo radio -->
+            <label for="genere">Genere</label><br>
+            <input type="radio" id="maschile" name="maschile" value="m" required>
+            <label for="maschile">maschile</label><br>
+            <input type="radio" id="femminile" name="femminile" value="f">
+            <label for="femminile">Female</label><br><br>
+
+            <!-- Citta select - selezione fra diverse opzioni-->
+            <label for="citta_residenza">Città di residenza</label><br>
+            <select id="citta_residenza" name="citta_residenza" required>
+                <option value=""></option>  
+                <option value="Ancona">Ancona</option>
+                <option value="Jesi">Jesi</option>
+                <option value="Monsano">Monsano</option>
+            </select><br><br>
+
+            <!-- Via di residenza, con numero-->
+            <label for="via_residenza">Via di residenza,  numero</label><br>
+            <input type="text" id="via_residenza" name="via_residenza" value=""><br><br>
+
+            <!-- telefono-->
+            <label for="telefono">Telefono</label><br>
+            <input type="text" id="telefono" name="telefono" value=""><br><br>
+       
+            <!-- usermail -->
+            <label for="uname">User name</label><br>
+            <input type="text" id="uname" name="uname" value=""><br><br>
+        
+            <!-- input tipo email -->
+            <label for="email">Email</label><br>
+            <input type="email" id="email" name="email" required><br><br>
+
+            <!-- input tipo password -->
+            <label for="password">Password</label><br>
+            <input type="password" id="password" name="password" required><br><br>
+
+            <!-- input tipo button (submit prevede invio modulo) -->
+            <input type="button" value="Invio" onclick="stampadati()">
+        </form><br><br>
+
+        <!-- Dove verranno inseriti i dati processati da Javascript-->
+        <table id="dati"></table><br>
+    </section>
+
+    <footer>
+        <p>
+           Indirizzo
+           Via Raffaello Sanzio, 8
+           60035 - JESI (AN)
+        </p>
+    </footer>
+
+    
+    <!-- Collegamento al file javascript - in genere sempre in fondo al body-->
+    <script src="js/script_javascript.js"></script>
+    <script src="js/funzioniControllo.js"></script>
+
+</body>
+</html>
