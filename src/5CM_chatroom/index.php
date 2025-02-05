@@ -1,3 +1,70 @@
+<?php
+    session_start();
+    require_once('includes/db.php');
+
+    $login_error = "";
+    $registration_success = false;
+    $registration_error = "";
+
+    // Controllo login
+    if ($_POST!=null){
+        if ($_POST['loginUsername']!="" && $_POST['loginPassword']!="")  {
+            $username = $_POST['loginUsername'];
+            $password = $_POST['loginPassword'];
+            
+            // Query per selezionare l'utente con le credenziali fornite
+            $query = "SELECT * FROM utenti WHERE nome_utente = ?";
+            // Preparo la query
+            $stmt = $conn->prepare($query);
+            // Associo i parametri alla query, "ss" indica che sono due stringhe
+            $stmt->bind_param("s", $username);
+            // Eseguo la query
+            $stmt->execute();
+            // Ottengo il risultato
+            $result = $stmt->get_result();
+            // Controllo se esiste almeno una riga nel risultato
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+                if ($user && password_verify($password, $user['password'])) {
+    
+                    $_SESSION['username'] = $user['nome_utente'];
+                    var_dump($_POST);
+                    exit();
+                    header('Location: dashboard.php');
+                }
+                else $login_error = "Password errata";
+            }
+            else $login_error = "Utente non presente";
+        }
+        else $login_error = "Campi vuoti";
+        
+
+        if ($_POST['registerUsername']!="" && $_POST['registerPassword']!="" && $_POST['registerEmail']!="") {
+            $username = $_POST['registerUsername'];
+            $password = password_hash($_POST['registerPassword'], PASSWORD_DEFAULT);
+            $email = $_POST['registerEmail'];
+            
+
+            // Query per inserire l'utente con le credenziali fornite
+            $query = "INSERT INTO utenti (nome_utente, email, password) VALUES (?,?,?)";
+            // Preparo la query
+            $stmt = $conn->prepare($query);
+            // Associo i parametri alla query, "sss" indica che sono tre stringhe
+            $stmt->bind_param("sss", $username, $email, $password);
+            // Eseguo la query
+            try{    
+                $stmt->execute();
+            } catch(mysqli_sql_exception $e){
+                // Se l'eccezione è una mysqli_sql_exception
+                $registration_error = "Utente o e-mail già presente";
+            } catch (Exception $e) {
+                // Se si verifica un errore generico
+                $registration_error = "Errore durante la registrazione";        }
+            $stmt->close();
+        }
+        else $registration_error = "Campi vuoti";
+    }
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,6 +125,16 @@
             width: 90%;
         }
 
+        .error{
+            color: red;
+            font-weight: bold;
+        }
+
+        .success{
+            color: green;
+            font-weight: bold;
+        }
+
         button:hover {
             background-color: #4cae4c;
         }
@@ -74,17 +151,33 @@
     </style>
 </head>
 <body>
-    <?php
-        require_once('includes/db.php');
-    ?>
+
     <div class="container">
         <h1>Chatroom</h1>
         
+        <?php
+          if ($GLOBALS['registration_error'] == 1) 
+            echo "<script> showRegistration(); </script>";
+        ?>
         <!-- Login  -->
         <form id="loginForm" name="loginForm" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <input type="text" placeholder="Username" id="loginUsername" name="loginUsername">
-            <input type="password" placeholder="Password" id="loginPassword" name="loginPassword">
+            <input type="text" placeholder="Username" id="loginUsername" name="loginUsername" >
+            <input type="password" placeholder="Password" id="loginPassword" name="loginPassword" >
             <button id="loginButton">LOGIN</button>
+
+            <?php
+                if($login_error != ""){
+                    echo "<div class=\"error\"><br>";
+                    echo $login_error;
+                    echo "</div>";
+                }
+                if($registration_success){
+                    echo "<div class=\"success\"><br>";
+                    echo "Registrazione effettuata con successo!";
+                    echo "</div>";
+                }
+            ?>
+
             <div class="switch-form" id="switchLogin">
                 Non sei registrato? <a href="#" onclick="showRegistration()">REGISTRATI</a>
             </div>
@@ -97,91 +190,23 @@
             <input type="password" name="registerPassword" placeholder="Password" id="registerPassword">
             <button id="registerButton">REGISTRATI</button>
             <div class="switch-form" id="switchRegistrazione">
+            <?php
+
+            if($registration_error != ""){
+                echo "<div class=\"error\">";
+                echo $registration_error;
+                $GLOBALS['registration_error'] = 1;
+                echo "</div><br>";
+            }
+            ?>
             Esegui <a href="#" onclick="showLogin()">LOGIN</a>
             </div>
         </form>
     </div>
 
-    <?php 
-        // Controllo login
-        if (isset($_POST['loginUsername']) && isset($_POST['loginUsername']) && isset($_POST['loginPassword']))  {
-            $username = $_POST['loginUsername'];
-            $password = $_POST['loginPassword'];
-            
-            // Query per selezionare l'utente con le credenziali fornite
-            $query = "SELECT * FROM utenti WHERE nome_utente = ?";
-            // Preparo la query
-            $stmt = $conn->prepare($query);
-            // Associo i parametri alla query, "ss" indica che sono due stringhe
-            $stmt->bind_param("s", $username);
-            // Eseguo la query
-            $stmt->execute();
-            // Ottengo il risultato
-            $result = $stmt->get_result();
-            // Controllo se esiste almeno una riga nel risultato
-            if ($result->num_rows > 0) {
-                $user = $result->fetch_assoc();
-                  
-                if ($user && password_verify($password, $user['password'])) {
-                    $_SESSION['username'] = $user['nome_utente'];
-                    //header("Location: dashboard.php");
-
-                    echo "<div class=\"switch-form\">
-                            Login effettuato con successo
-                          </div>";    
-                    //echo "<script>showMessage(\"Login effettuato con successo\", \"switchLogin\")</script>";
-                }
-                else
-                {
-                echo "<div class=\"switch-form\">
-                    Password errata
-                    </div>"; 
-                }
-            }
-            else
-            {
-            echo "<div class=\"switch-form\">
-                Utente non presente
-                </div>"; 
-            }    
-        }
-
-        if (isset($_POST['registerUsername']) && isset($_POST['registerUsername']) && isset($_POST['registerPassword']) && isset($_POST['registerEmail'])) {
-            $username = $_POST['registerUsername'];
-            $password = password_hash($_POST['registerPassword'], PASSWORD_DEFAULT);
-            $email = $_POST['registerEmail'];
-
-
-            
-            // Query per selezionare l'utente con le credenziali fornite
-            $query = "INSERT INTO utenti (nome_utente, email, password) VALUES (?,?,?)";
-            // Preparo la query
-            $stmt = $conn->prepare($query);
-            // Associo i parametri alla query, "ss" indica che sono due stringhe
-            $stmt->bind_param("sss", $username, $email, $password);
-
-
-            // Eseguo la query
-            if($stmt->execute()){
-                 // L'inserimento è avvenuto con successo
-                 echo "<div class=\"switch-form\">
-                         Registrazione effettuata con successo!
-                       </div>"; 
-                       
-            } else {
-                  // Si è verificato un errore
-                  echo "<div class=\"switch-form\">
-                          Errore durante la registrazione!
-                        </div>"; 
-            }
-          
-
-            $stmt->close();
-
-        }
-
-
-
+    <?php
+        $registration_error="";
+        $login_error="";
     ?>
 
     <script>
@@ -195,11 +220,7 @@
             document.getElementById('loginForm').style.display = 'block';
         }
 
-        function showMessage(message, id) {
-            alert("Ciao");
-            console.log("Hello world!");
-            document.getElementById(id).innerHTML = message;
-        }        
+      
     </script>
 </body>
 </html>
