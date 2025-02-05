@@ -1,3 +1,3 @@
 <?php
-echo "eseguito da php: Ciao, mondo!";
+    echo "eseguito da php: Ciao, mondo!";
 ?>
