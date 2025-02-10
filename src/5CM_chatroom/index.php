@@ -8,7 +8,7 @@
 
     // Controllo login
     if ($_POST!=null){
-        if ($_POST['loginUsername']!="" && $_POST['loginPassword']!="")  {
+        if (isset($_POST['loginUsername']) && $_POST['loginUsername']!="" && isset($_POST['loginPassword']) && $_POST['loginPassword']!="")  {
             $username = $_POST['loginUsername'];
             $password = $_POST['loginPassword'];
             
@@ -26,20 +26,18 @@
             if ($result->num_rows > 0) {
                 $user = $result->fetch_assoc();
                 if ($user && password_verify($password, $user['password'])) {
-    
                     $_SESSION['username'] = $user['nome_utente'];
-                    var_dump($_POST);
-                    exit();
+                    $_SESSION['id_user'] = $user['codice'];
                     header('Location: dashboard.php');
                 }
                 else $login_error = "Password errata";
             }
             else $login_error = "Utente non presente";
         }
-        else $login_error = "Campi vuoti";
+  
         
 
-        if ($_POST['registerUsername']!="" && $_POST['registerPassword']!="" && $_POST['registerEmail']!="") {
+        if (isset($_POST['registerUsername']) && $_POST['registerUsername']!="" && isset($_POST['registerPassword']) && $_POST['registerPassword']!="" && isset($_POST['registerEmail']) && $_POST['registerEmail']!="") {
             $username = $_POST['registerUsername'];
             $password = password_hash($_POST['registerPassword'], PASSWORD_DEFAULT);
             $email = $_POST['registerEmail'];
@@ -62,7 +60,6 @@
                 $registration_error = "Errore durante la registrazione";        }
             $stmt->close();
         }
-        else $registration_error = "Campi vuoti";
     }
 ?>
 <!DOCTYPE html>
@@ -149,16 +146,25 @@
             text-decoration: none;
         }
     </style>
+
+    <script>
+            function showRegistration() {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registrationForm').style.display = 'block';
+            }
+
+            function showLogin() {
+                document.getElementById('registrationForm').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+            }
+    </script>
 </head>
 <body>
 
     <div class="container">
         <h1>Chatroom</h1>
         
-        <?php
-          if ($GLOBALS['registration_error'] == 1) 
-            echo "<script> showRegistration(); </script>";
-        ?>
+
         <!-- Login  -->
         <form id="loginForm" name="loginForm" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <input type="text" placeholder="Username" id="loginUsername" name="loginUsername" >
@@ -195,7 +201,7 @@
             if($registration_error != ""){
                 echo "<div class=\"error\">";
                 echo $registration_error;
-                $GLOBALS['registration_error'] = 1;
+                $_SESSION['registration_error'] = "errore";
                 echo "</div><br>";
             }
             ?>
@@ -209,19 +215,7 @@
         $login_error="";
     ?>
 
-    <script>
-        function showRegistration() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registrationForm').style.display = 'block';
-        }
 
-        function showLogin() {
-            document.getElementById('registrationForm').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-        }
-
-      
-    </script>
 </body>
 </html>
 
