@@ -6,6 +6,11 @@
     $registration_success = false;
     $registration_error = "";
 
+    if (isset($_SESSION['username'])) {
+        header("Location: chatroom.php"); // Redirect to Chatroom
+        exit();
+    }
+
     // Controllo login
     if ($_POST!=null){
         if (isset($_POST['loginUsername']) && $_POST['loginUsername']!="" && isset($_POST['loginPassword']) && $_POST['loginPassword']!="")  {
@@ -28,7 +33,7 @@
                 if ($user && password_verify($password, $user['password'])) {
                     $_SESSION['username'] = $user['nome_utente'];
                     $_SESSION['id_user'] = $user['codice'];
-                    header('Location: dashboard.php');
+                    header('Location: chatroom.php');
                 }
                 else $login_error = "Password errata";
             }

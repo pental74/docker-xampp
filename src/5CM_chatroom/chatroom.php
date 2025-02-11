@@ -1,14 +1,4 @@
 <?php
-/**
- * index.php
- * 
- * Description: This file is the main dashboard for the chat application.
- * It displays the available chat rooms, allows users to create new rooms,
- * and lets users select and interact with individual rooms.
- * 
- * @version 1.0
- * @author  [Your Name]
- */
 session_start();
 
 if (!isset($_SESSION['username'])) {
@@ -20,22 +10,27 @@ $username = $_SESSION['username'];  // username tabella utenti
 $id_utente = $_SESSION['id_user'];  // codice tabella utenti
 
 require_once('includes/db.php');   // file connessione al database
+
 /**
  * Retrieve all available rooms from the database.
- *
- * This function queries the 'stanze' table to retrieve a list of all
- * available chat rooms, including their unique identifiers and names.
- *
- * @param PDO $conn The PDO database connection object.
  */
 $sql = "SELECT DISTINCT * FROM stanze";
 $result = $conn->query($sql);
 $rooms = [];
 if($result->num_rows > 0){
-
     while($row = $result->fetch_assoc()){
-        $rooms[] = ['numero_stanza' => $row['codice'], 'nome' => $row['nome']];
+        $lastMessageSql = "SELECT messaggi.testo, utenti.nome_utente 
+                            FROM messaggi 
+                            LEFT JOIN utenti ON messaggi.utente_codice = utenti.codice 
+                            WHERE stanza_codice = '{$row['codice']}' 
+                            ORDER BY data_ora DESC 
+                            LIMIT 1";
+        $lastMessageResult = $conn->query($lastMessageSql);
+        $lastMessage = $lastMessageResult->num_rows > 0 ? $lastMessageResult->fetch_assoc()['testo'] : "Nessun messaggio";
+        $rooms[] = ['numero_stanza' => $row['codice'], 'nome' => $row['nome'], 'messaggio' => $lastMessage];
     }
+
+
 }else {
     $rooms = [];
 }
@@ -46,8 +41,9 @@ if($result->num_rows > 0){
  * ensuring the room name is provided and inserting the new room
  * into the database.
  *
- * @param PDO $conn The PDO database connection object.
  */
+
+// Codice php per inserire una nuova stanza nel database
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_room_name'])) {
     $new_room_name = htmlspecialchars($_POST['new_room_name']);
     $sql = "INSERT INTO stanze (nome) VALUES ('$new_room_name')";
@@ -70,22 +66,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['new_room_name'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .room-card {
+            background-color: #f8f9fa; /* Light grey */
+            border: 1px solid #dee2e6; /* Light grey border */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="mt-5">Benvenuto, <?php echo $username; ?>! </h1>
+        <h3 class="mt-5">Benvenuto, <?php echo $username; ?>! </h3>
         <a href="logout.php" class="btn btn-danger mt-3">Logout</a>
-        <a href=# class="btn btn-success mt-3">Crea Nuova Stanza</a>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#newRoomModal">
+            Crea Nuova Stanza
+        </button>
+    </div>    
+
+    <!-- Pop up per inserire una nuova stanza --> 
+    <div class="modal fade" id="newRoomModal" tabindex="-1" aria-labelledby="newRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newRoomModalLabel">Crea una Nuova Stanza</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="">
+                        <input type="text" name="new_room_name" class="form-control" placeholder="Nome della stanza" required>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="container mt-5"> <h2 class="fw-bold pb-2">Chat Rooms</h2>
         <?php
         if (count($rooms) > 0) {
             foreach ($rooms as $room){ ?>
-                <a href="chat.php?room=<?php echo $room['numero_stanza']; ?>" class="text-decoration-none"> 
-                    <div class="card mb-4">
+                <a href="chat.php?room=<?php echo $room['numero_stanza']; ?>" class=" text-decoration-none"> 
+                    <div class="card mb-4 room-card">
                         <div class="card-header">
                             <h2 class="card-title"><?php echo $room['nome'] ?></h2>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text"><?php echo $room['messaggio']; ?></p>
                         </div>                      
                     </div>
                 </a>
