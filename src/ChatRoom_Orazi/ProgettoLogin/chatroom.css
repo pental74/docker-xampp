@@ -1,0 +1,93 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #120efa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    width: 1200px; /* Aumenta la larghezza della chatroom */
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar {
+    width: 250px; /* Aumenta la larghezza della sidebar */
+    background-color: #0059ff;
+    color: white;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    padding: 10px;
+}
+
+.sidebar h2 {
+    text-align: center;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 15px; /* Aumenta l'altezza degli elementi della lista */
+    cursor: pointer;
+    border-bottom: 1px solid #444;
+}
+
+.sidebar ul li:hover {
+    background-color: #555;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    background-color: #0957ff;
+    color: white;
+    padding: 15px; /* Aumenta l'altezza dell'header */
+    text-align: center;
+    border-top-right-radius: 10px;
+}
+
+.chat-messages {
+    flex: 0.0;
+    padding: 150px; /* Aumenta il padding interno */
+    overflow-y: auto;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.chat-input {
+    display: flex;
+    padding: 15px; /* Aumenta il padding interno */
+}
+
+.chat-input input[type="text"] {
+    flex: 1;
+    padding: 15px; /* Aumenta il padding interno del campo di input */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.chat-input button {
+    padding: 15px; /* Aumenta la dimensione del bottone */
+    border: none;
+    background-color: #0026ff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.chat-input button:hover {
+    background-color: #002fff;
+}
