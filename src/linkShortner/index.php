@@ -7,7 +7,7 @@
     $registration_error = "";
 
     if (isset($_SESSION['username'])) {
-        header("Location: doshroom.php"); // Redirect to Chatroom
+        header("Location: dashboard.php"); // Redirect to Chatroom
         exit();
     }
 
@@ -48,13 +48,14 @@
 
             // Query per inserire l'utente con le credenziali fornite
             $query = "INSERT INTO utenti (email, password) VALUES (?,?)";
-            exit
 
             // Preparo la query
             $stmt = $conn->prepare($query);
             // Associo i parametri alla query, "ss" indica che sono tre stringhe
             $stmt->bind_param("ss", $email, $password);
             // Eseguo la query
+
+
             try{    
                 $stmt->execute();
             } catch(mysqli_sql_exception $e){
@@ -218,8 +219,6 @@
         $registration_error="";
         $login_error="";
     ?>
-
-
 </body>
 </html>
 
