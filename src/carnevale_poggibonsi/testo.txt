@@ -1,0 +1,37 @@
+Quest’anno, in occasione del celebre Carnevale di Poggibonsi, gli organizzatori hanno pensato di utilizzare
+un’applicazione web per raccogliere ed automatizzare le partecipazioni della famosa sfilata delle maschere
+di paese. 
+
+Ogni abitante di Poggibonsi sarà abilitato al login nel sistema utilizzando come credenziali il
+proprio codice fiscale (username) e la propria data di nascita (password), e successivamente, una volta
+autenticato, potrà scegliere di partecipare alla sfilata selezionando una delle maschere proposte dagli
+organizzatori.
+
+Per bilanciare il numero di partecipanti per ciascuna maschera, il sistema dovrà impedire la scelta di
+una certa maschera se il numero di abitanti ad averla scelta è maggiore di 50.
+
+Per fare ciò, è stato creato un DB relazionale MySQL con i seguenti parametri:
+• URL: “localhost"
+• username: “root"
+• password: “root"
+• nome DB: “Carnevale2025 ".
+
+Aiuta quindi gli organizzatori, e realizza una web app in PHP/SQL che soddisfi le seguenti specifiche
+funzionali: ì
+
+• Login degli utenti;
+• Pannello di controllo con la lista delle maschere e la possibilità di selezionarne una;
+• Pagina di conferma della maschera scelta e visualizzazione dei partecipanti per ciascuna maschera.
+
+Ed in particolare, realizzare:
+• (+1.5/-0) Lo schema logico e concettuale del Database;
+• (+1.5/-0) Uno schema che mostri le interazioni tra le varie pagine web statiche e dinamiche (dati
+
+scambiati e metodi HTTP utilizzati);
+• (+1.5/-0) Una o più pagine web per la gestione del login;
+• (+2.5/-0) Una o più pagine web per il pannello di controllo con scelta della maschera;
+• (+3/-0) Una o più pagine web per la conferma della maschera scelta e visualizzazione delle parte-
+cipazioni.;
+
+Nota: è possibile (ma non obbligatorio) usare la tecnica del postback avere un’unica pagina PHP che
+gestisca sia la visualizzazione che l’invio dei dati.
