@@ -37,6 +37,7 @@ services:
     volumes:
       - ./src:/var/www/html
       - ./.htaccess:/var/www/html/.htaccess
+    restart: unless-stopped
     depends_on:
       - db
       - phpmyadmin
