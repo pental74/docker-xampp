@@ -36,6 +36,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./src:/var/www/html
+      - ./.htaccess:/var/www/html/.htaccess
     depends_on:
       - db
       - phpmyadmin

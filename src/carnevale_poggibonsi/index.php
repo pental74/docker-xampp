@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <h1>Carnevale di Paggibonsi 2025</h1>
     <h2>Login</h2>
     <?php if (isset($errore)) echo "<p>$errore</p>"; ?>
-    <form method="POST" action="login.php">
+    <form method="POST" action="index.php">
         <label>Codice Fiscale:</label>
         <input type="text" name="codice_fiscale" required>
         <label>Data di Nascita:</label>
