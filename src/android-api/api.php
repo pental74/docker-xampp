@@ -6,11 +6,25 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 switch($method) {
     // CREATE
+    // case 'POST':
+    //     if(isset($_POST['nome']) && isset($_POST['email'])) {
+    //         $stmt = $conn->prepare("INSERT INTO utenti (nome, email, telefono) VALUES (?, ?, ?)");
+    //         $stmt->execute([$_POST['nome'], $_POST['email'], $_POST['telefono']]);
+    //         echo json_encode(['message' => 'Utente creato con successo']);
+    //     }
+    //     break;
+
+    // Debug
     case 'POST':
-        if(isset($_POST['nome']) && isset($_POST['email'])) {
+        $data = json_decode(file_get_contents("php://input"), true);
+        // Debug: restituisci i dati ricevuti
+        file_put_contents('debug.log', print_r($data, true)); // Scrive i dati in un file
+        if (isset($data['nome']) && isset($data['email'])) {
             $stmt = $conn->prepare("INSERT INTO utenti (nome, email, telefono) VALUES (?, ?, ?)");
-            $stmt->execute([$_POST['nome'], $_POST['email'], $_POST['telefono']]);
-            echo json_encode(['message' => 'Utente creato con successo']);
+            $stmt->execute([$data['nome'], $data['email'], $data['telefono'] ?? null]);
+            echo json_encode(['message' => 'Utente creato con successo', 'id' => $conn->lastInsertId()]);
+        } else {
+            echo json_encode(['error' => 'Nome ed email sono obbligatori', 'data_received' => $data]);
         }
         break;
 
