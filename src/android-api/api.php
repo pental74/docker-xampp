@@ -1,71 +1,139 @@
 <?php
-require_once 'config.php';
-//header('Content-Type: application/json');
+    require_once 'config.php';
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+    header('Access-Control-Allow-Headers: Content-Type');
 
-$method = $_SERVER['REQUEST_METHOD'];
+    $method = $_SERVER['REQUEST_METHOD'];
 
-switch($method) {
-    // CREATE
-    // case 'POST':
-    //     if(isset($_POST['nome']) && isset($_POST['email'])) {
-    //         $stmt = $conn->prepare("INSERT INTO utenti (nome, email, telefono) VALUES (?, ?, ?)");
-    //         $stmt->execute([$_POST['nome'], $_POST['email'], $_POST['telefono']]);
-    //         echo json_encode(['message' => 'Utente creato con successo']);
-    //     }
-    //     break;
+    switch ($method) {
+        // CREATE
+        case 'POST':
+            $data = json_decode(file_get_contents("php://input"), true);
+            // Debug: restituisci i dati ricevuti (opzionale)
+            // file_put_contents('debug.log', print_r($data, true));
+            if (isset($data['nome']) && isset($data['email']) && isset($data['telefono'])) {
+                $stmt = mysqli_prepare($conn, "INSERT INTO utenti (nome, email, telefono) VALUES (?, ?, ?)");
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "sss", $data['nome'], $data['email'], $data['telefono']);
+                    if (mysqli_stmt_execute($stmt)) {
+                        $id = mysqli_insert_id($conn);
+                        echo json_encode(['message' => 'Utente creato con successo', 'id' => $id]);
+                    } else {
+                        echo json_encode(['error' => 'Errore nella creazione: ' . mysqli_stmt_error($stmt)]);
+                    }
+                    mysqli_stmt_close($stmt);
+                } else {
+                    echo json_encode(['error' => 'Errore nella preparazione della query: ' . mysqli_error($conn)]);
+                }
+            } else {
+                echo json_encode(['error' => 'Nome, email e telefono sono obbligatori', 'data_received' => $data]);
+            }
+            break;
 
-    // Debug
-    case 'POST':
-        $data = json_decode(file_get_contents("php://input"), true);
-        // Debug: restituisci i dati ricevuti
-        file_put_contents('debug.log', print_r($data, true)); // Scrive i dati in un file
-        if (isset($data['nome']) && isset($data['email'])) {
-            $stmt = $conn->prepare("INSERT INTO utenti (nome, email, telefono) VALUES (?, ?, ?)");
-            $stmt->execute([$data['nome'], $data['email'], $data['telefono'] ?? null]);
-            echo json_encode(['message' => 'Utente creato con successo', 'id' => $conn->lastInsertId()]);
-        } else {
-            echo json_encode(['error' => 'Nome ed email sono obbligatori', 'data_received' => $data]);
-        }
-        break;
+        // READ ALL / READ SINGLE / SEARCH
+        case 'GET':
+            if (isset($_GET['id'])) {
+                // READ SINGLE
+                $stmt = mysqli_prepare($conn, "SELECT * FROM utenti WHERE id = ?");
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "i", $_GET['id']);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+                    $utente = mysqli_fetch_assoc($result);
+                    echo json_encode($utente ? $utente : ['error' => 'Utente non trovato']);
+                    mysqli_stmt_close($stmt);
+                } else {
+                    echo json_encode(['error' => 'Errore nella preparazione della query: ' . mysqli_error($conn)]);
+                }
+            } elseif (isset($_GET['search'])) {
+                // SEARCH
+                $search = "%" . $_GET['search'] . "%";
+                $stmt = mysqli_prepare($conn, "SELECT * FROM utenti WHERE nome LIKE ? OR email LIKE ?");
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "ss", $search, $search);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+                    $utenti = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $utenti[] = $row;
+                    }
+                    echo json_encode($utenti);
+                    mysqli_stmt_close($stmt);
+                } else {
+                    echo json_encode(['error' => 'Errore nella preparazione della query: ' . mysqli_error($conn)]);
+                }
+            } else {
+                // READ ALL
+                $result = mysqli_query($conn, "SELECT * FROM utenti");
+                if ($result) {
+                    $utenti = [];
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $utenti[] = $row;
+                    }
+                    echo json_encode($utenti);
+                } else {
+                    echo json_encode(['error' => 'Errore nella lettura: ' . mysqli_error($conn)]);
+                }
+            }
+            break;
 
-    // READ ALL
-    case 'GET':
-        if(isset($_GET['id'])) {
-            // READ SINGLE
-            $stmt = $conn->prepare("SELECT * FROM utenti WHERE id = ?");
-            $stmt->execute([$_GET['id']]);
-            echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
-        } elseif(isset($_GET['search'])) {
-            // SEARCH
-            $search = "%" . $_GET['search'] . "%";
-            $stmt = $conn->prepare("SELECT * FROM utenti WHERE nome LIKE ? OR email LIKE ?");
-            $stmt->execute([$search, $search]);
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
-        } else {
-            // READ ALL
-            $stmt = $conn->query("SELECT * FROM utenti");
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
-        }
-        break;
+        // UPDATE
+        case 'PUT':
+            $data = json_decode(file_get_contents("php://input"), true); // Usa JSON invece di parse_str
+            if (isset($data['id']) && isset($data['nome']) && isset($data['email']) && isset($data['telefono'])) {
+                $stmt = mysqli_prepare($conn, "UPDATE utenti SET nome = ?, email = ?, telefono = ? WHERE id = ?");
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "sssi", $data['nome'], $data['email'], $data['telefono'], $data['id']);
+                    if (mysqli_stmt_execute($stmt)) {
+                        if (mysqli_stmt_affected_rows($stmt) > 0) {
+                            echo json_encode(['message' => 'Utente aggiornato con successo']);
+                        } else {
+                            echo json_encode(['error' => 'Nessun utente aggiornato (ID non trovato)']);
+                        }
+                    } else {
+                        echo json_encode(['error' => 'Errore nell\'aggiornamento: ' . mysqli_stmt_error($stmt)]);
+                    }
+                    mysqli_stmt_close($stmt);
+                } else {
+                    echo json_encode(['error' => 'Errore nella preparazione della query: ' . mysqli_error($conn)]);
+                }
+            } else {
+                echo json_encode(['error' => 'ID, nome, email e telefono sono obbligatori']);
+            }
+            break;
 
-    // UPDATE
-    case 'PUT':
-        parse_str(file_get_contents("php://input"), $put_vars);
-        if(isset($put_vars['id'])) {
-            $stmt = $conn->prepare("UPDATE utenti SET nome = ?, email = ?, telefono = ? WHERE id = ?");
-            $stmt->execute([$put_vars['nome'], $put_vars['email'], $put_vars['telefono'], $put_vars['id']]);
-            echo json_encode(['message' => 'Utente aggiornato con successo']);
-        }
-        break;
+        // DELETE
+        case 'DELETE':
+            $data = json_decode(file_get_contents("php://input"), true); // Usa JSON invece di $_GET
+            if (isset($data['id'])) {
+                $stmt = mysqli_prepare($conn, "DELETE FROM utenti WHERE id = ?");
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "i", $data['id']);
+                    if (mysqli_stmt_execute($stmt)) {
+                        if (mysqli_stmt_affected_rows($stmt) > 0) {
+                            echo json_encode(['message' => 'Utente eliminato con successo']);
+                        } else {
+                            echo json_encode(['error' => 'Utente non trovato']);
+                        }
+                    } else {
+                        echo json_encode(['error' => 'Errore nell\'eliminazione: ' . mysqli_stmt_error($stmt)]);
+                    }
+                    mysqli_stmt_close($stmt);
+                } else {
+                    echo json_encode(['error' => 'Errore nella preparazione della query: ' . mysqli_error($conn)]);
+                }
+            } else {
+                echo json_encode(['error' => 'ID obbligatorio']);
+            }
+            break;
 
-    // DELETE
-    case 'DELETE':
-        parse_str(file_get_contents("php://input"), $delete_vars);
-        if(isset($delete_vars['id'])) {
-            $stmt = $conn->prepare("DELETE FROM utenti WHERE id = ?");
-            $stmt->execute([$delete_vars['id']]);
-            echo json_encode(['message' => 'Utente eliminato con successo']);
-        }
-        break;
+        default:
+            echo json_encode(['error' => 'Metodo non supportato']);
+            break;
 }
+
+// Chiudi la connessione
+mysqli_close($conn);
 ?>
